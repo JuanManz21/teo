@@ -71,6 +71,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['remove_from_cart'])){
         .cart-item-details p { margin: 5px 0; color: #666; }
         .cart-item-actions { text-align: right; }
         .cart-total { text-align: right; margin-top: 20px; font-size: 20px; font-weight: bold; }
+        .cart-total a { margin-top: 15px; display: inline-block; }
     </style>
 </head>
 <body>
