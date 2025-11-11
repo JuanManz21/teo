@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natural Delying - Carrito</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <div class="navbar">
+        <h1>NATURAL DELYING</h1>
+        <nav>
+            <a href="index.html">INICIO</a>
+            <a href="productos.html">PRODUCTOS</a>
+            <a href="cart.html">CARRITO</a>
+        </nav>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="container">
+        <h2>Carrito de Compras</h2>
+        <table id="cart-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Cart items will be loaded here dynamically -->
+            </tbody>
+        </table>
+        <button id="checkout-btn">Pagar</button>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const response = await fetch('/products');
+            const products = await response.json();
+            const cartTableBody = document.querySelector('#cart-table tbody');
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            cart.forEach(productId => {
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${product.name}</td>
+                        <td>$${product.price}</td>
+                    `;
+                    cartTableBody.appendChild(row);
+                }
+            });
+
+            document.getElementById('checkout-btn').addEventListener('click', async () => {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Debes iniciar sesión para pagar');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                const response = await fetch('/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ products: cart })
+                });
+
+                if (response.ok) {
+                    localStorage.removeItem('cart');
+                    alert('Pedido realizado con éxito');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Error al realizar el pedido');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

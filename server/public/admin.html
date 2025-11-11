@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natural Delying - Panel de Administración</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="navbar">
+        <h1>NATURAL DELYING</h1>
+        <nav>
+            <a href="index.html">INICIO</a>
+            <a href="productos.html">PRODUCTOS</a>
+            <a href="admin.html">ADMIN</a>
+        </nav>
+    </div>
+    <div class="container">
+        <h2>Panel de Administración</h2>
+        <h3>Usuarios</h3>
+        <table id="users-table">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Users will be loaded here dynamically -->
+            </tbody>
+        </table>
+        <h3>Pedidos</h3>
+        <table id="orders-table">
+            <thead>
+                <tr>
+                    <th>ID Pedido</th>
+                    <th>ID Usuario</th>
+                    <th>Productos</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Orders will be loaded here dynamically -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const authHeader = { 'Authorization': `Bearer ${token}` };
+
+            // Fetch users
+            const usersResponse = await fetch('/admin/users', { headers: authHeader });
+            if (usersResponse.ok) {
+                const users = await usersResponse.json();
+                const usersTableBody = document.querySelector('#users-table tbody');
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.username}</td>
+                        <td><button onclick="deleteUser(${user.id})">Eliminar</button></td>
+                    `;
+                    usersTableBody.appendChild(row);
+                });
+            }
+
+            // Fetch orders
+            const ordersResponse = await fetch('/admin/orders', { headers: authHeader });
+            if (ordersResponse.ok) {
+                const orders = await ordersResponse.json();
+                const ordersTableBody = document.querySelector('#orders-table tbody');
+                orders.forEach(order => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${order.id}</td>
+                        <td>${order.user_id}</td>
+                        <td>${order.products}</td>
+                        <td>${order.status}</td>
+                        <td><button onclick="cancelOrder(${order.id})">Cancelar</button></td>
+                    `;
+                    ordersTableBody.appendChild(row);
+                });
+            }
+        });
+
+        async function deleteUser(userId) {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/admin/users/${userId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error al eliminar el usuario');
+            }
+        }
+
+        async function cancelOrder(orderId) {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/admin/orders/${orderId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: 'cancelled' })
+            });
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error al cancelar el pedido');
+            }
+        }
+    </script>
+</body>
+</html>

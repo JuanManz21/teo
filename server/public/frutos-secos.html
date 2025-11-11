@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natural Delying - Catálogo de Frutos Secos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <div class="navbar" style="position: relative;">
+        <a href="productos.html" class="back-arrow">←</a>
+        <h1>NATURAL DELYING</h1>
+        <nav>
+            <a href="index.html">INICIO</a>
+            <a href="productos.html">PRODUCTOS</a>
+            <a href="cart.html">CARRITO</a>
+        </nav>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="container">
+        <div class="catalog-header">
+            <!-- Grid de frutos secos -->
+            <div class="juice-grid" id="fs-grid">
+                <!-- Products will be loaded here dynamically -->
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const response = await fetch('/products');
+            const products = await response.json();
+            const fsGrid = document.getElementById('fs-grid');
+            const frutosSecos = products.filter(p => p.category === 'fruto-seco');
+            frutosSecos.forEach(fs => {
+                const fsItem = document.createElement('div');
+                fsItem.className = 'juice-item';
+                fsItem.innerHTML = `
+                    <div class="juice-item-image">
+                        <img src="${fs.image}" alt="${fs.name}">
+                        <div class="juice-item-title">${fs.name}</div>
+                    </div>
+                    <div class="juice-item-price">$${fs.price}</div>
+                    <button onclick="addToCart(${fs.id})">Añadir al carrito</button>
+                `;
+                fsGrid.appendChild(fsItem);
+            });
+        });
+
+        function addToCart(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.push(productId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert('Producto añadido al carrito');
+        }
+    </script>
+</body>
+</html>

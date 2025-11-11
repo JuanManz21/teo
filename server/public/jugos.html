@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natural Delying - Catálogo de Jugos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <div class="navbar" style="position: relative;">
+        <a href="productos.html" class="back-arrow">←</a>
+        <h1>NATURAL DELYING</h1>
+        <nav>
+            <a href="index.html">INICIO</a>
+            <a href="productos.html">PRODUCTOS</a>
+            <a href="cart.html">CARRITO</a>
+        </nav>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="container">
+        <div class="catalog-header">
+            <!-- Grid de jugos -->
+            <div class="juice-grid" id="juice-grid">
+                <!-- Products will be loaded here dynamically -->
+            </div>
+        </div>
+
+        <!-- Caja de información -->
+        <div class="info-box">
+            <p>Aqui te mostraremos estas sugerencias de mjugos con sus respectivos toppings, estos jugos tienen un agradable sabor para nuestro paladar.</p>
+            <p>si tu deseas crear tu propia mezcla de frutas frescas y frutos secos seleccion la opcion "MAS" para mostrarte todas las frutas y frutos secos que tenemos para que armes tu delicioso jugo natural</p>
+            <a href="frutos-secos.html" class="more-btn">MAS →</a>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const response = await fetch('/products');
+            const products = await response.json();
+            const juiceGrid = document.getElementById('juice-grid');
+            const juices = products.filter(p => p.category === 'jugo');
+            juices.forEach(juice => {
+                const juiceItem = document.createElement('div');
+                juiceItem.className = 'juice-item';
+                juiceItem.innerHTML = `
+                    <div class="juice-item-image">
+                        <img src="${juice.image}" alt="${juice.name}">
+                        <div class="juice-item-title">${juice.name}</div>
+                    </div>
+                    <div class="juice-item-price">$${juice.price}</div>
+                    <button onclick="addToCart(${juice.id})">Añadir al carrito</button>
+                `;
+                juiceGrid.appendChild(juiceItem);
+            });
+        });
+
+        function addToCart(productId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.push(productId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert('Producto añadido al carrito');
+        }
+    </script>
+</body>
+</html>
